@@ -6,24 +6,22 @@ type Cell = (Integer,Integer)
 data World = World { cells :: Set Cell, size :: (Integer, Integer) }
 
 
-row :: y -> [x] -> [(x,y)]
-row y xs = map (\x' -> (x', y) ) xs
+row :: [x] -> y -> [(x,y)]
+row xs y = map (\x' -> (x', y) ) xs
 
-rows :: [y] -> [x] -> [[(x,y)]]
-rows ys xs = map (\y' -> row y' xs) ys
+rows :: [x] -> [y] -> [[(x,y)]]
+rows xs = map $ row xs
 
 showRow :: Set Cell -> [Cell] -> String
-showRow world_cells cells = map (\cell -> if Set.member cell world_cells then 'X' else ' ') cells
+showRow world_cells = map $ \cell -> if Set.member cell world_cells then 'X' else ' '
 
 showRows :: Set Cell -> [[Cell]] -> String
 showRows world_cells cell_matrix =
-  unlines $ map (\cell_row ->
-      showRow world_cells cell_row
-    ) cell_matrix
+  unlines $ map (showRow world_cells) cell_matrix
 
 instance Show World where
   show World { cells = c, size = (x,y) }=
-    showRows c $ rows [0..y-1] [0..x-1]
+    showRows c $ rows [0..x-1] [0..y-1]
 
 
 world = World { cells = Set.fromList [ (0,0), (1,1), (0,1), (1, 0), (3,4), (2,4) ]
@@ -31,4 +29,4 @@ world = World { cells = Set.fromList [ (0,0), (1,1), (0,1), (1, 0), (3,4), (2,4)
               }
 
 main =
-  putStrLn (show world)
+  putStrLn $ show world
