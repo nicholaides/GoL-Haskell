@@ -1,32 +1,58 @@
-import Data.Set (Set)
-import qualified Data.Set as Set
+import Data.Array (Array)
+import qualified Data.Array as Array
 
 type Cell = (Integer,Integer)
 
-data World = World { cells :: Set Cell, size :: (Integer, Integer) }
+data Row = Row [Bool]
 
+type Dimension = (Int, Int)
 
-row :: [x] -> y -> [(x,y)]
-row xs y = map (\x' -> (x', y) ) xs
+lengthen n a0 list =
+  let
+    num_to_take = max 0 (n - length list)
+    more = take num_to_take (repeat a0)
+  in
+    list ++ more
 
-rows :: [x] -> [y] -> [[(x,y)]]
-rows xs = map $ row xs
+instance Show Row where
+  show (Row bools) = let
+    toChar = \b -> if b then 'X' else ' '
+    in
+      (map toChar bools) ++ "|\n"
 
-showRow :: Set Cell -> [Cell] -> String
-showRow world_cells = map $ \cell -> if Set.member cell world_cells then 'X' else ' '
+parseRow :: String -> Row
+parseRow s = Row $ map (=='X') s
 
-showRows :: Set Cell -> [[Cell]] -> String
-showRows world_cells cell_matrix =
-  unlines $ map (showRow world_cells) cell_matrix
+data World = World Dimension [Row]
+parseWorld :: String -> World
+parseWorld s = let
+    (str_x : str_y : body) = lines s
+    x = read str_x
+    y = read str_y
+    rows  = map parseRow body
+    long_rows = lengthen y (Row []) rows -- make sure we have enough rows. add extra rows if necessary
+    all_long_rows = map (lengthen x False) (map (\(Row bools) -> bools) rows) -- make sure the rows are long enough. Fill them in w/ False if necessary
+    real_rows = map Row all_long_rows
+  in
+    World (x, y) real_rows
 
 instance Show World where
-  show World { cells = c, size = (x,y) }=
-    showRows c $ rows [0..x-1] [0..y-1]
+  show (World (x,y) rows) = let
+      firstLine = (take x $ repeat '=') ++ ".\n"
+      body = foldl1 (++) (map show rows)
+    in
+      firstLine ++ body
 
 
-world = World { cells = Set.fromList [ (0,0), (1,1), (0,1), (1, 0), (3,4), (2,4) ]
-              , size  = (5, 5)
-              }
+world :: World
+world = parseWorld (unlines [
+  "8",
+  "5",
+  "X X X X",
+  " X X X",
+  "  X X",
+  "   X"
+  ])
 
 main =
   putStrLn $ show world
