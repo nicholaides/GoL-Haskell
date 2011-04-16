@@ -23,10 +23,10 @@ showRows world_cells cell_matrix =
 
 instance Show World where
   show World { cells = c, size = (x,y) }=
-    showRows c $ rows [-y..y] [-x..x]
+    showRows c $ rows [0..y-1] [0..x-1]
 
 
-world = World { cells = Set.fromList [ (0,0), (1,1), (-1,-1), (1,-1), (-1,1), (2,5) ]
+world = World { cells = Set.fromList [ (0,0), (1,1), (0,1), (1, 0), (3,4), (2,4) ]
               , size  = (5, 5)
               }
 
