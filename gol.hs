@@ -43,16 +43,6 @@ instance Show World where
     in
       firstLine ++ body
 
-
-world :: World
-world = parseWorld (unlines [
-  "8",
-  "5",
-  "X X X X",
-  " X X X",
-  "  X X",
-  "   X"
-  ])
-
-main =
-  putStrLn $ show world
+main = do
+  worldStr <- getContents
+  putStrLn $ show $ parseWorld worldStr

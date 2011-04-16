@@ -9,7 +9,7 @@ end
 
 task :run do
   Rake::Task["gol"].invoke
-  sh "./gol"
+  sh "./gol < world.txt"
 end
 
 task :default => [:run]
