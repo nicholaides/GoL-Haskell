@@ -4,7 +4,7 @@ CLEAN.include("**/*.o")
 CLEAN.include("gol")
 
 file "gol" => ["gol.hs"] do
-  sh "ghc gol"
+  sh "ghc gol.hs"
 end
 
 task :run do
