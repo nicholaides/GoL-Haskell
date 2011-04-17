@@ -1,11 +1,17 @@
 import Data.Array (Array)
 import qualified Data.Array as Array
 
-type Cell = (Integer,Integer)
+type Cell = (Int,Int)
 
-data Row = Row [Bool]
+data Row = Row [Life]
 
 type Dimension = (Int, Int)
+
+data Life = Alive | Dead
+fromBool b = if b then Alive else Dead
+
+toChar Alive = 'X'
+toChar _     = ' '
 
 lengthen n a0 list =
   let
@@ -15,13 +21,10 @@ lengthen n a0 list =
     list ++ more
 
 instance Show Row where
-  show (Row bools) = let
-    toChar = \b -> if b then 'X' else ' '
-    in
-      (map toChar bools) ++ "|\n"
+  show (Row lifes) = (map toChar lifes) ++ "|\n"
 
 parseRow :: String -> Row
-parseRow s = Row $ map (=='X') s
+parseRow s = Row $ map fromBool $ map (=='X') s
 
 data World = World Dimension [Row]
 parseWorld :: String -> World
@@ -31,7 +34,7 @@ parseWorld s = let
     y = read str_y
     rows  = map parseRow body
     long_rows = lengthen y (Row []) rows -- make sure we have enough rows. add extra rows if necessary
-    all_long_rows = map (lengthen x False) (map (\(Row bools) -> bools) rows) -- make sure the rows are long enough. Fill them in w/ False if necessary
+    all_long_rows = map (lengthen x Dead) (map (\(Row lifes) -> lifes) rows) -- make sure the rows are long enough. Fill them in w/ Dead if necessary
     real_rows = map Row all_long_rows
   in
     World (x, y) real_rows
@@ -42,6 +45,36 @@ instance Show World where
       body = foldl1 (++) (map show rows)
     in
       firstLine ++ body
+
+cellLife :: World -> Cell -> Life
+cellLife (World _ rows) (x,y) = let
+    Row row = rows !! y
+  in row !! x
+
+possibleSurroundingCells :: Cell -> [Cell]
+possibleSurroundingCells (x,y) = [ (x+dx, y+dy) | dx <- [-1..1], dy <- [-1..1], (dx,dy) /= (0,0) ]
+
+surroundingCells :: World -> Cell -> [Cell]
+surroundingCells (World boundCell _) cell =
+  filter ((0,0) < )
+    (filter (boundCell>) (possibleSurroundingCells cell))
+
+getsLife :: World -> Cell ->  Life
+getsLife world@(World (x,y) rows) cell = let
+  life = cellLife world cell
+  surroundingLife = map (cellLife world) $ surroundingCells world cell
+  in newState life (length surroundingLife)
+  where
+    newState Alive lifeCount
+      | 2 == lifeCount = Alive
+    newState _ lifeCount
+      | 3 == lifeCount = Alive
+    newState _ _       = Dead
+
+-- tick :: World -> World
+-- tick (World (x,y) rows) =
+
+
 
 main = do
   worldStr <- getContents
