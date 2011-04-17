@@ -1,6 +1,6 @@
 import Data.Array (Array)
 import qualified Data.Array as Array
-
+import System.Posix.Unistd
 import Debug.Trace
 
 type Cell = (Int,Int)
@@ -84,10 +84,11 @@ tick world@(World dim rows) = let
   in
     World dim newRows
 
+go world = do
+  putStrLn $ show $ world
+  sleep 1
+  go $ tick world
+
 main = do
   worldStr <- getContents
-  let world = parseWorld worldStr
-  putStrLn $ show $ world
-  putStrLn $ show $ tick world
-  putStrLn $ show $ tick $ tick world
-  putStrLn $ show $ tick $ tick $ tick world
+  go $ parseWorld worldStr
