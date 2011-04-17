@@ -71,10 +71,15 @@ getsLife world@(World (x,y) rows) cell = let
       | 3 == lifeCount = Alive
     newState _ _       = Dead
 
--- tick :: World -> World
--- tick (World (x,y) rows) =
+tickRow :: World -> (Int, Row) -> Row
+tickRow world (y, Row lifes) =
+  Row $ map (\(x,life) -> getsLife world (x,y) ) (zip [1..] lifes)
 
-
+tick :: World -> World
+tick world@(World dim rows) = let
+    newRows = map (tickRow world) (zip [1..] rows)
+  in
+    World dim newRows
 
 main = do
   worldStr <- getContents
